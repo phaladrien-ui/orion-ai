@@ -4,7 +4,7 @@ import { FolderRootIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
@@ -79,6 +79,22 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
+  // Raccourci clavier fonctionnel (Ctrl+K)
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      // Supporte Ctrl+K (Windows/Linux) et Cmd+K (Mac) pour être universel
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpenMobile(false);
+        router.push("/");
+        router.refresh();
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, [router, setOpenMobile]);
+
   const handleDeleteAll = () => {
     const deletePromise = fetch("/api/history", { method: "DELETE" });
     toast.promise(deletePromise, {
@@ -128,7 +144,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                           <PlusIcon size={16} />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>New Chat</TooltipContent>
+                      <TooltipContent>New Chat (Ctrl+K)</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
@@ -154,7 +170,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarHeader>
 
         <SidebarContent>
-          {/* SECTION 1: ACTIONS RAPIDES */}
+          {/* SECTION 1: QUICK ACTIONS */}
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -164,9 +180,17 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     className="hover:bg-accent"
                     onClick={() => setOpenMobile(false)}
                   >
-                    <Link href="/">
-                      <PlusIcon size={18} />
-                      <span className="font-medium">New chat</span>
+                    <Link
+                      className="flex items-center justify-between w-full"
+                      href="/"
+                    >
+                      <div className="flex items-center gap-2">
+                        <PlusIcon size={18} />
+                        <span className="font-medium">New chat</span>
+                      </div>
+                      <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground/90 shadow-sm transition-colors">
+                        Ctrl+K
+                      </kbd>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
