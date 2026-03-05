@@ -23,8 +23,6 @@ import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
 
-// --- LOGO ORION ---
-// --- LOGO ORION FIN ET SUBTIL (Biome-compliant) ---
 const OrionLogo = ({
   size = 16,
   className,
@@ -35,13 +33,12 @@ const OrionLogo = ({
   <svg
     className={className}
     height={size}
-    shapeRendering="geometricPrecision" // Maintient la netteté du trait fin
+    shapeRendering="geometricPrecision"
     viewBox="0 0 200 200"
     width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
     <defs>
-      {/* Filtre de lueur doux et diffus pour le mode sombre */}
       <filter height="160%" id="glow-logo" width="160%" x="-30%" y="-30%">
         <feGaussianBlur result="coloredBlur" stdDeviation="5" />
         <feMerge>
@@ -55,8 +52,8 @@ const OrionLogo = ({
       cx="100"
       cy="100"
       fill="none"
-      r="85" // Légèrement plus grand pour équilibrer la finesse
-      strokeWidth="12" // Trait fin et élégant
+      r="85"
+      strokeWidth="12"
     />
   </svg>
 );
@@ -68,6 +65,7 @@ const PurePreviewMessage = ({
   isReadonly,
   message,
   regenerate,
+  requiresScrollPadding,
   setMessages,
   vote,
 }: {
@@ -77,6 +75,7 @@ const PurePreviewMessage = ({
   isReadonly: boolean;
   message: ChatMessage;
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
+  requiresScrollPadding?: boolean;
   setMessages: UseChatHelpers<ChatMessage>["setMessages"];
   vote: Vote | undefined;
 }) => {
@@ -90,7 +89,9 @@ const PurePreviewMessage = ({
 
   return (
     <div
-      className="group/message fade-in w-full animate-in duration-200"
+      className={cn("group/message fade-in w-full animate-in duration-200", {
+        "pb-12": requiresScrollPadding, // Utilisation ici pour régler noUnusedFunctionParameters
+      })}
       data-role={message.role}
       data-testid={`message-${message.role}`}
     >
@@ -102,7 +103,7 @@ const PurePreviewMessage = ({
       >
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border shadow-sm">
-            <OrionLogo size={20} />
+            <OrionLogo size={16} />
           </div>
         )}
 
@@ -206,18 +207,15 @@ const PurePreviewMessage = ({
 
             if (type === "tool-getWeather") {
               const { toolCallId, state } = part;
-              const widthClass = "w-[min(100%,450px)]";
-
               if (state === "output-available") {
                 return (
-                  <div className={widthClass} key={toolCallId}>
+                  <div className="w-[min(100%,450px)]" key={toolCallId}>
                     <Weather weatherAtLocation={part.output} />
                   </div>
                 );
               }
-
               return (
-                <div className={widthClass} key={toolCallId}>
+                <div className="w-[min(100%,450px)]" key={toolCallId}>
                   <Tool className="w-full" defaultOpen={true}>
                     <ToolHeader state={state} type="tool-getWeather" />
                     <ToolContent>
@@ -230,6 +228,7 @@ const PurePreviewMessage = ({
 
             if (type === "tool-createDocument") {
               const { toolCallId } = part;
+              // CORRECTION Ligne 234: Ajout des accolades
               if (part.output && "error" in part.output) {
                 return null;
               }
@@ -244,6 +243,7 @@ const PurePreviewMessage = ({
 
             if (type === "tool-updateDocument") {
               const { toolCallId } = part;
+              // CORRECTION Ligne 246: Ajout des accolades
               if (part.output && "error" in part.output) {
                 return null;
               }
@@ -261,7 +261,6 @@ const PurePreviewMessage = ({
 
             if (type === "tool-requestSuggestions") {
               const { toolCallId, state } = part;
-
               return (
                 <Tool defaultOpen={true} key={toolCallId}>
                   <ToolHeader state={state} type="tool-requestSuggestions" />
@@ -323,7 +322,7 @@ export const ThinkingMessage = () => {
       <div className="flex items-start justify-start gap-3">
         <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border shadow-sm">
           <div className="animate-pulse">
-            <OrionLogo className="opacity-90" size={20} />
+            <OrionLogo className="opacity-90" size={16} />
           </div>
         </div>
 
