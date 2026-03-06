@@ -181,12 +181,16 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
-                    <span className="text-sm font-medium">CEO AI</span>
+                    <span className="text-sm font-semibold tracking-widest">
+                      CEO AI
+                    </span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
-                    <span className="text-sm font-medium">CTO AI</span>
+                    <span className="text-sm font-semibold tracking-widest">
+                      CTO AI
+                    </span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

@@ -319,7 +319,8 @@ const PureToolbar = ({
   artifactKind: ArtifactKind;
 }) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  // CORRECTION ICI : Ajout de (undefined) pour React 19
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
