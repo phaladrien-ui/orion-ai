@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  CpuIcon,
   FolderRootIcon,
   PlusIcon,
   RocketIcon,
+  ShieldCheckIcon,
   TrashIcon,
   UserPlusIcon,
   UsersIcon,
@@ -181,16 +183,25 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
-                    <span className="text-sm font-semibold tracking-widest">
-                      CEO AI
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <ShieldCheckIcon
+                        className="text-muted-foreground/70"
+                        size={16}
+                      />
+                      <span className="text-sm font-normal tracking-widest text-foreground/90">
+                        CEO AI
+                      </span>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
-                    <span className="text-sm font-semibold tracking-widest">
-                      CTO AI
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <CpuIcon className="text-muted-foreground/70" size={16} />
+                      <span className="text-sm font-normal tracking-widest text-foreground/90">
+                        CTO AI
+                      </span>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
