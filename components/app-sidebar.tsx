@@ -1,6 +1,13 @@
 "use client";
 
-import { FolderRootIcon, PlusIcon, TrashIcon } from "lucide-react";
+import {
+  FolderRootIcon,
+  PlusIcon,
+  RocketIcon,
+  TrashIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
@@ -14,6 +21,16 @@ import {
   SidebarHistory,
 } from "@/components/sidebar-history";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -33,16 +50,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -51,7 +58,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Raccourci clavier (Ctrl+K)
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -69,7 +75,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     };
 
     document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    return () => {
+      document.removeEventListener("keydown", down);
+    };
   }, [router, setOpenMobile]);
 
   const handleDeleteAll = async () => {
@@ -96,7 +104,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     try {
       await deletePromise;
     } catch {
-      // Correction Biome : suppression de la variable 'error' inutilisée
       setIsDeleting(false);
     }
   };
@@ -110,7 +117,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <Link
                 className="flex items-center gap-3"
                 href="/"
-                onClick={() => setOpenMobile(false)}
+                onClick={() => {
+                  setOpenMobile(false);
+                }}
               >
                 <OrionLogo size={22} />
                 <span className="font-semibold text-lg tracking-tight">
@@ -135,14 +144,16 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                           <PlusIcon size={16} />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>New Chat (Ctrl+K)</TooltipContent>
+                      <TooltipContent>New Session (Ctrl+K)</TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           className="h-8 w-8 p-0"
-                          onClick={() => setShowDeleteAllDialog(true)}
+                          onClick={() => {
+                            setShowDeleteAllDialog(true);
+                          }}
                           variant="ghost"
                         >
                           <TrashIcon
@@ -161,47 +172,44 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarHeader>
 
         <SidebarContent>
+          {/* TEAM */}
           <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Team
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    className="hover:bg-accent"
-                    onClick={() => setOpenMobile(false)}
-                  >
-                    <Link
-                      className="flex items-center justify-between w-full"
-                      href="/"
-                    >
-                      <div className="flex items-center gap-2">
-                        <PlusIcon size={18} />
-                        <span className="font-medium">New chat</span>
-                      </div>
-                      <span className="hidden sm:block text-[9px] font-mono text-muted-foreground/40 tracking-widest">
-                        CTRL+K
-                      </span>
-                    </Link>
+                  <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
+                    <span className="text-sm font-medium">CEO AI</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
+                    <span className="text-sm font-medium">CTO AI</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
 
+          {/* COLLECTIVE SUITE */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-              Projects
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Collective Suite
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    className="opacity-80 hover:opacity-100"
+                    onClick={() => {
+                      setOpenMobile(false);
+                    }}
                   >
-                    <Link href="/projects">
-                      <FolderRootIcon size={18} />
-                      <span>Workspace</span>
+                    <Link className="flex items-center gap-2" href="/">
+                      <UsersIcon size={16} />
+                      <span className="text-sm font-medium">New Session</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -209,12 +217,44 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </SidebarGroupContent>
           </SidebarGroup>
 
+          {/* OPERATIONS */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-              Chats
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Operations
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarHistory user={user} />
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* RESOURCES */}
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Resources
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link className="flex items-center gap-2" href="/projects">
+                      <FolderRootIcon size={16} />
+                      <span className="text-sm font-medium">Workspace</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton className="opacity-50 cursor-not-allowed text-muted-foreground">
+                    <RocketIcon size={16} />
+                    <span className="text-sm font-medium">Deployments</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton className="opacity-50 cursor-not-allowed text-muted-foreground">
+                    <UserPlusIcon size={16} />
+                    <span className="text-sm font-medium">Recruitment</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
