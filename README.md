@@ -1,71 +1,62 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Chatbot" src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chatbot</h1>
+<a href="#">
+  <img alt="Neural OS" src="app/(chat)/opengraph-image.png">
+  <h1 align="center">Neural OS | Infrastructure Management</h1>
 </a>
 
 <p align="center">
-    Chatbot (formerly AI Chatbot) is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
+    Orchestration system for the deployment and management of hybrid divisions (AI + Human).
+    This software enables the structuring, recruitment, and steering of specialized operational units operating on a multi-agent communication bus.
 </p>
 
 <p align="center">
-  <a href="https://chatbot.dev"><strong>Read Docs</strong></a> ·
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
+  <a href="#technical-architecture"><strong>Architecture</strong></a> ·
+  <a href="#operational-features"><strong>Features</strong></a> ·
+  <a href="#workflow"><strong>Workflow</strong></a> ·
   <a href="#running-locally"><strong>Running locally</strong></a>
 </p>
 <br/>
 
-## Features
+## 🏗 Technical Architecture
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports OpenAI, Anthropic, Google, xAI, and other model providers via AI Gateway
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+### 1. The Communication Bus (Neural Bus)
+Synchronization protocol between specialized agent instances.
+- **Actionable Object Exchange:** Structured communication (JSON) between Strategy (CEO) and Execution (CTO/CMO) hubs.
+- **Context Graph Synchronization:** Unified graph database ensuring that any technical modification (Tech Division) is immediately reflected in the operational strategy (Ops Division).
+- **Conflict Arbitration:** Automatic resolution loop between agents prior to human validation (e.g., security validation vs. deployment speed).
 
-## Model Providers
+### 2. Division Management (Hybrid Squads)
+Autonomous units composed of synthetic resources and human oversight.
+- **Vertical Recruitment:** Deployment of agents trained on specific datasets (Code Audit, Growth, Legal).
+- **Human Lead Integration:** Interface for recruiting external experts to steer agent squads on high-responsibility tasks.
+- **Experience Engine (XP):** Success/failure log storage system in local Vector Stores. Agents accumulate contextual memory for each validated task.
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default model is [OpenAI](https://openai.com) GPT-4.1 Mini, with support for Anthropic, Google, and xAI models.
+### 3. Resource Lifecycle
+Direct workforce management interface.
+- **Provisioning (Hire):** Immediate instantiation of an agent or human expert within the sidebar.
+- **Promotion / Allocation:** Extension of computing power and context access for high-performing agents.
+- **De-provisioning (Fire):** Instance removal and automatic cleanup of associated data storage.
 
-### AI Gateway Authentication
+## 🛠 Operational Features
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
+| Feature | Technical Description |
+| :--- | :--- |
+| **Neural Activity Stream** | Real-time "thinking logs" and inter-agent exchange feeds via WebSockets. |
+| **Filesystem Access** | Direct read/write capabilities on the code repository for the CTO agent. |
+| **Deployment Triggers** | Triggering of CI/CD builds upon division lead validation. |
+| **Resource Monitor** | Tracking of token consumption and CPU load per department. |
+| **API Connectors** | Native integration with GitHub, Stripe, AWS, and Ads Managers for direct execution. |
 
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
+## 📊 Workflow
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
-
-## Deploy Your Own
-
-You can deploy your own version of Chatbot to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/chatbot)
+1. **Directive:** Definition of an objective in the command hub.
+2. **Decomposition:** The Bus segments the objective into tasks for relevant divisions.
+3. **Parallel Execution:** Simultaneous agent work (e.g., code authoring and security auditing).
+4. **Validation:** Breakpoint for approval by the department's human lead.
+5. **Archiving:** Output indexing in the system's long-term memory.
 
 ## Running locally
 
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
-
 ```bash
 pnpm install
-pnpm db:migrate # Setup database or apply latest database changes
+pnpm db:setup
 pnpm dev
-```
-
-Your app template should now be running on [localhost:3000](http://localhost:3000).
