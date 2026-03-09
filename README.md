@@ -1,6 +1,6 @@
 <a href="#">
   <img alt="Neural OS" src="app/(chat)/Orion_platform.PNG">
-  <h1 align="center">Neural OS | Infrastructure Management</h1>
+  <h1 align="center">Orion | Infrastructure Management</h1>
 </a>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## 🏗 Technical Architecture
 
-### 1. The Communication Bus (Neural Bus)
+### 1. The Communication Bus (NCS)
 Synchronization protocol between specialized agent instances.
 - **Actionable Object Exchange:** Structured communication (JSON) between Strategy (CEO) and Execution (CTO/CMO) hubs.
 - **Context Graph Synchronization:** Unified graph database ensuring that any technical modification (Tech Division) is immediately reflected in the operational strategy (Ops Division).
