@@ -47,7 +47,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           />
         </UISidebarHeader>
 
-        {/* Sections fixes du haut */}
+        {/* Sections fixes du haut - Team est replié mais montre CEO AI */}
         <div className="flex-shrink-0 px-2">
           <TeamSection permissions={permissions} />
           <CollectiveSection permissions={permissions} />
@@ -58,7 +58,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           <OperationsSection user={user} />
         </div>
 
-        {/* Section fixe du bas */}
+        {/* Section fixe du bas - Resources ouvert par défaut */}
         <div className="flex-shrink-0 px-2">
           <ResourcesSection permissions={permissions} />
         </div>

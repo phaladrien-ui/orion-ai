@@ -21,7 +21,7 @@ interface TeamSectionProps {
 
 export function TeamSection({ permissions }: TeamSectionProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {

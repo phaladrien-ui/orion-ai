@@ -30,7 +30,7 @@ interface ResourcesSectionProps {
 
 export function ResourcesSection({ permissions }: ResourcesSectionProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(true); // Ouvert par défaut (tous visibles)
   const [isHovered, setIsHovered] = useState(false);
 
   const handleRecruitmentClick = (e: React.MouseEvent) => {
