@@ -1,7 +1,8 @@
-"use client"; // Déjà présent
+"use client";
 
 import { CpuIcon, ShieldCheckIcon } from "lucide-react";
-import { useEffect, useState } from "react"; // Ajoute ça
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -18,52 +19,43 @@ interface TeamSectionProps {
 }
 
 export function TeamSection({ permissions }: TeamSectionProps) {
-  // Solution temporaire : attendre le client
-  const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+1 pour CEO AI
+      if (e.ctrlKey && e.key === "1") {
+        e.preventDefault();
+        router.push("/ceo"); // Adapte le chemin
+      }
 
-  // Pendant le SSR, on ne rend que le CEO AI (toujours le même)
-  if (!isClient) {
-    return (
-      <SidebarGroup>
-        <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-          Team
-        </SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <ShieldCheckIcon
-                    className="text-muted-foreground/70"
-                    size={16}
-                  />
-                  <span className="text-sm font-normal tracking-widest text-foreground/90">
-                    CEO AI
-                  </span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    );
-  }
+      // Ctrl+2 pour CTO AI (seulement si visible)
+      if (e.ctrlKey && e.key === "2" && permissions.canSeeCto) {
+        e.preventDefault();
+        router.push("/cto"); // Adapte le chemin
+      }
+    };
 
-  // Sur le client, on rend la version complète avec conditions
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [router, permissions.canSeeCto]);
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
         Team
+        <span className="ml-auto text-xs font-normal text-muted-foreground/50">
+          Ctrl+1/2
+        </span>
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {/* CEO AI - toujours visible */}
+          {/* CEO AI */}
           <SidebarMenuItem>
-            <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
+            <SidebarMenuButton
+              className="h-9 w-full transition-colors cursor-pointer justify-between"
+              onClick={() => router.push("/ceo")}
+            >
               <div className="flex items-center gap-3">
                 <ShieldCheckIcon
                   className="text-muted-foreground/70"
@@ -73,19 +65,24 @@ export function TeamSection({ permissions }: TeamSectionProps) {
                   CEO AI
                 </span>
               </div>
+              <span className="text-xs text-muted-foreground/50">Ctrl+1</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* CTO AI - visible seulement si connecté */}
+          {/* CTO AI (conditionnel) */}
           {permissions.canSeeCto && (
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 w-full transition-colors cursor-pointer">
+              <SidebarMenuButton
+                className="h-9 w-full transition-colors cursor-pointer justify-between"
+                onClick={() => router.push("/cto")}
+              >
                 <div className="flex items-center gap-3">
                   <CpuIcon className="text-muted-foreground/70" size={16} />
                   <span className="text-sm font-normal tracking-widest text-foreground/90">
                     CTO AI
                   </span>
                 </div>
+                <span className="text-xs text-muted-foreground/50">Ctrl+2</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
