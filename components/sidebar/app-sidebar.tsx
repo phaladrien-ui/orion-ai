@@ -1,17 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { User } from "next-auth";
-import { Sidebar, SidebarContent, SidebarHeader as UISidebarHeader } from "@/components/ui/sidebar";
-import { SidebarHeader } from "./sidebar-header";
-import { TeamSection } from "./sections/team-section";
+import { useState } from "react";
+import {
+  Sidebar,
+  SidebarHeader as UISidebarHeader,
+} from "@/components/ui/sidebar";
+import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
+import { DeleteAllDialog } from "./delete-all-dialog";
+import { SidebarFooter } from "./footer/sidebar-footer";
 import { CollectiveSection } from "./sections/collective-section";
 import { OperationsSection } from "./sections/operations-section";
 import { ResourcesSection } from "./sections/resources-section";
-import { SidebarFooter } from "./footer/sidebar-footer";
-import { DeleteAllDialog } from "./delete-all-dialog";
-import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
+import { TeamSection } from "./sections/team-section";
+import { SidebarHeader } from "./sidebar-header";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -23,7 +26,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     if (isDeleting) {
       return;
     }
-    
+
     setIsDeleting(true);
     try {
       await fetch("/api/history", { method: "DELETE" });
@@ -41,30 +44,39 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     <>
       <Sidebar className="group-data-[side=left]:border-r-0">
         <UISidebarHeader className="pt-4">
-          <SidebarHeader 
-            user={user} 
+          <SidebarHeader
             onDeleteAll={() => setShowDeleteAllDialog(true)}
+            user={user}
           />
         </UISidebarHeader>
 
-        <SidebarContent>
-          {/* Sections dans l'ordre voulu */}
-          <TeamSection permissions={permissions} />
-          <CollectiveSection permissions={permissions} />
-          <OperationsSection user={user} />
-          {/* Espace flexible pour pousser Resources en bas */}
-          <div className="flex-1" />
-          <ResourcesSection permissions={permissions} />
-        </SidebarContent>
+        {/* Structure en colonne avec sections fixes et défilante */}
+        <div className="flex flex-col h-[calc(100vh-8rem)]">
+          {/* Sections fixes en haut */}
+          <div className="flex-shrink-0">
+            <TeamSection permissions={permissions} />
+            <CollectiveSection permissions={permissions} />
+          </div>
+
+          {/* Section des messages - défilante */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <OperationsSection user={user} />
+          </div>
+
+          {/* Resources - fixe en bas */}
+          <div className="flex-shrink-0">
+            <ResourcesSection permissions={permissions} />
+          </div>
+        </div>
 
         <SidebarFooter user={user} />
       </Sidebar>
 
-      <DeleteAllDialog 
-        open={showDeleteAllDialog}
-        onOpenChange={setShowDeleteAllDialog}
-        onDelete={handleDeleteAll}
+      <DeleteAllDialog
         isDeleting={isDeleting}
+        onDelete={handleDeleteAll}
+        onOpenChange={setShowDeleteAllDialog}
+        open={showDeleteAllDialog}
       />
     </>
   );
