@@ -1,16 +1,16 @@
 "use client";
 
-import { KeyboardIcon } from "lucide-react";
 import type { User } from "next-auth";
 import { useState } from "react";
-import { SidebarUserNav } from "@/components/sidebar/sidebar-user-nav";
-import { Button } from "@/components/ui/button";
+import { KeyboardIcon, XIcon } from "lucide-react";
 import { SidebarFooter as UISidebarFooter } from "@/components/ui/sidebar";
+import { SidebarUserNav } from "@/components/sidebar/sidebar-user-nav";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 export function SidebarFooter({ user }: { user: User | undefined }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -21,27 +21,64 @@ export function SidebarFooter({ user }: { user: User | undefined }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8"
               onClick={() => setShowShortcuts(!showShortcuts)}
-              size="icon"
-              variant="ghost"
             >
               <KeyboardIcon size={16} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">Keyboard shortcuts</TooltipContent>
+          <TooltipContent side="right">
+            Keyboard shortcuts
+          </TooltipContent>
         </Tooltip>
 
         {user && <SidebarUserNav user={user} />}
       </div>
 
+      {/* Tableau stylé des raccourcis */}
       {showShortcuts && (
-        <div className="p-2 text-xs border-t border-sidebar-border">
-          <div className="font-medium mb-1">Keyboard shortcuts</div>
-          <div className="grid grid-cols-2 gap-1 text-muted-foreground">
-            <span>Ctrl+1</span> <span>CEO AI</span>
-            <span>Ctrl+2</span> <span>CTO AI</span>
-            <span>Ctrl+N</span> <span>New Session</span>
+        <div className="p-3 border-t border-sidebar-border bg-sidebar-accent/5">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Keyboard Shortcuts
+            </h4>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5"
+              onClick={() => setShowShortcuts(false)}
+            >
+              <XIcon size={12} />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center gap-2">
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-sidebar-accent rounded border border-sidebar-border">
+                ⌘1
+              </kbd>
+              <span className="text-muted-foreground">CEO AI</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-sidebar-accent rounded border border-sidebar-border">
+                ⌘2
+              </kbd>
+              <span className="text-muted-foreground">CTO AI</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-sidebar-accent rounded border border-sidebar-border">
+                ⌘N
+              </kbd>
+              <span className="text-muted-foreground">New Session</span>
+            </div>
+          </div>
+          
+          <div className="mt-2 text-[10px] text-muted-foreground/50 text-center border-t border-sidebar-border pt-2">
+            ⌘ = Ctrl on Windows
           </div>
         </div>
       )}
