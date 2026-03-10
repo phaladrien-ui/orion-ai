@@ -50,17 +50,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           />
         </UISidebarHeader>
 
-        {/* Conteneur flex column avec hauteur fixe */}
-        <div className="flex h-full flex-col">
-          {/* Sections supérieures avec scroll si nécessaire */}
-          <div className="flex-1 overflow-y-auto">
+        {/* Structure en colonne avec sections fixes et défilante */}
+        <div className="flex flex-col h-[calc(100vh-8rem)]">
+          {/* Sections fixes en haut */}
+          <div className="flex-shrink-0">
             <TeamSection permissions={permissions} />
             <CollectiveSection permissions={permissions} />
+          </div>
+
+          {/* Section des messages - défilante */}
+          <div className="flex-1 overflow-y-auto min-h-0">
             <OperationsSection user={user} />
           </div>
 
-          {/* Resources TOUJOURS en bas, non scrollable */}
-          <div className="mt-auto border-t pt-2">
+          {/* Resources - fixe en bas */}
+          <div className="flex-shrink-0">
             <ResourcesSection permissions={permissions} />
           </div>
         </div>
