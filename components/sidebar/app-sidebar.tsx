@@ -5,7 +5,6 @@ import type { User } from "next-auth";
 import { useState } from "react";
 import {
   Sidebar,
-  SidebarContent,
   SidebarHeader as UISidebarHeader,
 } from "@/components/ui/sidebar";
 import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
@@ -51,15 +50,20 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           />
         </UISidebarHeader>
 
-        <SidebarContent>
-          {/* Sections dans l'ordre voulu */}
-          <TeamSection permissions={permissions} />
-          <CollectiveSection permissions={permissions} />
-          <OperationsSection user={user} />
-          {/* Espace flexible pour pousser Resources en bas */}
-          <div className="flex-1" />
-          <ResourcesSection permissions={permissions} />
-        </SidebarContent>
+        {/* Conteneur flex column avec hauteur fixe */}
+        <div className="flex h-full flex-col">
+          {/* Sections supérieures avec scroll si nécessaire */}
+          <div className="flex-1 overflow-y-auto">
+            <TeamSection permissions={permissions} />
+            <CollectiveSection permissions={permissions} />
+            <OperationsSection user={user} />
+          </div>
+
+          {/* Resources TOUJOURS en bas, non scrollable */}
+          <div className="mt-auto border-t pt-2">
+            <ResourcesSection permissions={permissions} />
+          </div>
+        </div>
 
         <SidebarFooter user={user} />
       </Sidebar>
