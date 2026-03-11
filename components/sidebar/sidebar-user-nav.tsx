@@ -7,7 +7,6 @@ import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -40,6 +39,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuthSync } from "@/hooks/use-auth-sync";
 import { guestRegex } from "@/lib/constants";
 
 export function SidebarUserNav({ user }: { user: User }) {
@@ -49,31 +49,33 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Activer la synchronisation entre onglets
+  useAuthSync();
+
   const isGuest = guestRegex.test(data?.user?.email ?? "");
   const isAuthenticated = !isGuest && !!user;
 
+  // Fonction pour notifier les autres onglets
+  const notifyAuthChange = () => {
+    const channel = new BroadcastChannel("auth_sync");
+    channel.postMessage({ type: "AUTH_CHANGED" });
+    channel.close();
+  };
+
   // Vérifier au chargement si on doit afficher la modale de connexion
   useEffect(() => {
-    // Attendre que la session soit chargée
-    if (status === "loading") {
-      return;
-    }
+    if (status === "loading") return;
 
-    // Si l'utilisateur n'est PAS authentifié (invité ou pas de session)
     if (!isAuthenticated) {
-      // Vérifier si on a déjà affiché la modale dans cette session
       const hasSeenPrompt = sessionStorage.getItem("hasSeenLoginPrompt");
 
       if (!hasSeenPrompt) {
-        // Petite temporisation pour laisser la page s'afficher d'abord
         const timer = setTimeout(() => {
           setShowLoginPrompt(true);
           sessionStorage.setItem("hasSeenLoginPrompt", "true");
         }, 500);
 
-        return () => {
-          clearTimeout(timer);
-        };
+        return () => clearTimeout(timer);
       }
     }
   }, [status, isAuthenticated]);
@@ -85,10 +87,11 @@ export function SidebarUserNav({ user }: { user: User }) {
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
 
-    // Réinitialiser le flag pour que la modale réapparaisse au prochain chargement
     sessionStorage.removeItem("hasSeenLoginPrompt");
 
     signOut({ redirect: false }).then(() => {
+      // Notifier les autres onglets
+      notifyAuthChange();
       // Rechargement complet après déconnexion
       window.location.href = "/";
     });
@@ -96,13 +99,12 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleLoginRedirect = () => {
     setShowLoginPrompt(false);
+    notifyAuthChange(); // Notifier avant de partir
     router.push("/login");
   };
 
   const handleContinueAsGuest = () => {
     setShowLoginPrompt(false);
-    // On garde le flag pour ne pas réafficher tout de suite
-    // mais il reste en mémoire pour la session
   };
 
   const handleAuthAction = () => {
@@ -115,6 +117,7 @@ export function SidebarUserNav({ user }: { user: User }) {
     }
 
     if (isGuest) {
+      notifyAuthChange(); // Notifier avant de partir
       router.push("/login");
     } else {
       handleLogout();

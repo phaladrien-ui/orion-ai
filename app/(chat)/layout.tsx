@@ -2,8 +2,9 @@ import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
 import { DataStreamProvider } from "@/components/data-stream-provider";
-import { AppSidebar } from "@/components/sidebar/app-sidebar"; // ← SEULE MODIFICATION
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useAuthSync } from "@/hooks/use-auth-sync"; // ← Ajout de l'import
 import { auth } from "../(auth)/auth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 async function SidebarWrapper({ children }: { children: React.ReactNode }) {
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
+
+  useAuthSync(); // ← Ajout du hook ici
 
   return (
     <SidebarProvider defaultOpen={!isCollapsed}>
