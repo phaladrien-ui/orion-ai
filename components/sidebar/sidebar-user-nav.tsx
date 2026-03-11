@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -50,12 +51,25 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
 
+  // Vérifier au chargement si on vient de se déconnecter
+  useEffect(() => {
+    const justLoggedOut = sessionStorage.getItem("justLoggedOut");
+    if (justLoggedOut === "true" && !user) {
+      sessionStorage.removeItem("justLoggedOut");
+      setShowLoginPrompt(true);
+    }
+  }, [user]);
+
   const handleLogout = () => {
     setShowLogoutConfirm(true);
   };
 
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
+
+    // Marquer qu'on vient de se déconnecter
+    sessionStorage.setItem("justLoggedOut", "true");
+
     signOut({ redirect: false }).then(() => {
       // Rechargement complet après déconnexion
       window.location.href = "/";
@@ -69,8 +83,7 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleContinueAsGuest = () => {
     setShowLoginPrompt(false);
-    // Rechargement pour revenir en mode invité
-    window.location.href = "/";
+    // Rester en mode invité, pas de rechargement nécessaire
   };
 
   const handleAuthAction = () => {
