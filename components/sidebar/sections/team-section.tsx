@@ -1,8 +1,13 @@
 "use client";
 
-import { CpuIcon, ShieldCheckIcon, ChevronRightIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronRightIcon, CpuIcon, ShieldCheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -11,7 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
 
 interface TeamSectionProps {
   permissions: {
@@ -21,8 +26,12 @@ interface TeamSectionProps {
 
 export function TeamSection({ permissions }: TeamSectionProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false); // Fermé par défaut
   const [isHovered, setIsHovered] = useState(false);
+
+  const { isOpen, setPreference, isLoading } = useSidebarPreference(
+    "team",
+    false
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,33 +49,41 @@ export function TeamSection({ permissions }: TeamSectionProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [router, permissions.canSeeCto]);
 
+  if (isLoading) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Team
+        </SidebarGroupLabel>
+      </SidebarGroup>
+    );
+  }
+
   return (
     <SidebarGroup>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className="relative"
-        >
-          <CollapsibleTrigger asChild>
-            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors w-full flex items-center justify-between group">
-              <span>Team</span>
-              {isHovered && (
-                <ChevronRightIcon 
-                  className={`h-3 w-3 text-muted-foreground/50 transition-all duration-200 ${
-                    isOpen ? 'rotate-90' : ''
-                  }`} 
-                />
-              )}
-            </SidebarGroupLabel>
-          </CollapsibleTrigger>
-        </div>
-        
+      <Collapsible onOpenChange={setPreference} open={isOpen}>
+        <CollapsibleTrigger asChild>
+          <SidebarGroupLabel
+            className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors w-full flex items-center justify-between group"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <span>Team</span>
+            {isHovered && (
+              <ChevronRightIcon
+                className={`h-3 w-3 text-muted-foreground/50 transition-all duration-200 ${
+                  isOpen ? "rotate-90" : ""
+                }`}
+              />
+            )}
+          </SidebarGroupLabel>
+        </CollapsibleTrigger>
+
         <CollapsibleContent className="transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton 
+                <SidebarMenuButton
                   className="h-9 w-full transition-colors cursor-pointer"
                   onClick={() => router.push("/ceo")}
                 >
@@ -84,7 +101,7 @@ export function TeamSection({ permissions }: TeamSectionProps) {
 
               {permissions.canSeeCto && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     className="h-9 w-full transition-colors cursor-pointer"
                     onClick={() => router.push("/cto")}
                   >

@@ -1,17 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { User } from "next-auth";
-import { Sidebar, SidebarContent, SidebarHeader as UISidebarHeader } from "@/components/ui/sidebar";
-import { SidebarHeader } from "./sidebar-header";
-import { TeamSection } from "./sections/team-section";
+import { useState } from "react";
+
+import {
+  Sidebar,
+  SidebarHeader as UISidebarHeader,
+} from "@/components/ui/sidebar";
+import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
+import { DeleteAllDialog } from "./delete-all-dialog";
+import { SidebarFooter } from "./footer/sidebar-footer";
 import { CollectiveSection } from "./sections/collective-section";
 import { OperationsSection } from "./sections/operations-section";
 import { ResourcesSection } from "./sections/resources-section";
-import { SidebarFooter } from "./footer/sidebar-footer";
-import { DeleteAllDialog } from "./delete-all-dialog";
-import { useSidebarPermissions } from "@/hooks/sidebar/use-sidebar-permissions";
+import { TeamSection } from "./sections/team-section";
+import { SidebarHeader } from "./sidebar-header";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -23,7 +27,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     if (isDeleting) {
       return;
     }
-    
+
     setIsDeleting(true);
     try {
       await fetch("/api/history", { method: "DELETE" });
@@ -39,11 +43,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="group-data-[side=left]:border-r-0 flex flex-col h-screen">
-        <UISidebarHeader className="pt-4 flex-shrink-0">
-          <SidebarHeader 
-            user={user} 
+      <Sidebar className="flex flex-col h-screen group-data-[side=left]:border-r-0">
+        <UISidebarHeader className="flex-shrink-0 pt-4">
+          <SidebarHeader
             onDeleteAll={() => setShowDeleteAllDialog(true)}
+            user={user}
           />
         </UISidebarHeader>
 
@@ -54,7 +58,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </div>
 
         {/* Zone défilante pour l'historique uniquement */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-2">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2">
           <OperationsSection user={user} />
         </div>
 
@@ -66,11 +70,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarFooter user={user} />
       </Sidebar>
 
-      <DeleteAllDialog 
-        open={showDeleteAllDialog}
-        onOpenChange={setShowDeleteAllDialog}
-        onDelete={handleDeleteAll}
+      <DeleteAllDialog
         isDeleting={isDeleting}
+        onDelete={handleDeleteAll}
+        onOpenChange={setShowDeleteAllDialog}
+        open={showDeleteAllDialog}
       />
     </>
   );

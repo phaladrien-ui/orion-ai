@@ -29,13 +29,10 @@ import {
   suggestion,
   type User,
   user,
+  userPreferences,
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
-
-// Optionally, if not using email/pass login, you can
-// use the Drizzle adapter for Auth.js / NextAuth
-// https://authjs.dev/reference/adapter/drizzle
 
 // biome-ignore lint: Forbidden non-null assertion.
 const client = postgres(process.env.POSTGRES_URL!);
@@ -589,7 +586,6 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
       .select({ id: stream.id })
       .from(stream)
       .where(eq(stream.chatId, chatId))
-      .orderBy(asc(stream.createdAt))
       .execute();
 
     return streamIds.map(({ id }) => id);
@@ -597,6 +593,51 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     throw new ChatbotError(
       "bad_request:database",
       "Failed to get stream ids by chat id"
+    );
+  }
+}
+
+// ✅ NOUVELLES FONCTIONS pour les préférences utilisateur
+export async function getUserPreference(userId: string, key: string) {
+  try {
+    const [pref] = await db
+      .select()
+      .from(userPreferences)
+      .where(
+        and(eq(userPreferences.userId, userId), eq(userPreferences.key, key))
+      );
+    return pref?.value ?? null;
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get user preference"
+    );
+  }
+}
+
+export async function setUserPreference(
+  userId: string,
+  key: string,
+  value: any
+) {
+  try {
+    await db
+      .insert(userPreferences)
+      .values({
+        userId,
+        key,
+        value,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [userPreferences.userId, userPreferences.key],
+        set: { value, updatedAt: new Date() },
+      });
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to set user preference"
     );
   }
 }

@@ -1,9 +1,19 @@
 "use client";
 
-import { FolderRootIcon, RocketIcon, UserPlusIcon, ChevronRightIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  FolderRootIcon,
+  RocketIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -17,7 +27,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
 
 interface ResourcesSectionProps {
   permissions: {
@@ -30,8 +40,12 @@ interface ResourcesSectionProps {
 
 export function ResourcesSection({ permissions }: ResourcesSectionProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true); // Ouvert par défaut (tous visibles)
   const [isHovered, setIsHovered] = useState(false);
+
+  const { isOpen, setPreference, isLoading } = useSidebarPreference(
+    "resources",
+    true
+  );
 
   const handleRecruitmentClick = (e: React.MouseEvent) => {
     if (!permissions.isConnected) {
@@ -40,28 +54,36 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          Resources
+        </SidebarGroupLabel>
+      </SidebarGroup>
+    );
+  }
+
   return (
     <SidebarGroup>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className="relative"
-        >
-          <CollapsibleTrigger asChild>
-            <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors w-full flex items-center justify-between group">
-              <span>Resources</span>
-              {isHovered && (
-                <ChevronRightIcon 
-                  className={`h-3 w-3 text-muted-foreground/50 transition-all duration-200 ${
-                    isOpen ? 'rotate-90' : ''
-                  }`} 
-                />
-              )}
-            </SidebarGroupLabel>
-          </CollapsibleTrigger>
-        </div>
-        
+      <Collapsible onOpenChange={setPreference} open={isOpen}>
+        <CollapsibleTrigger asChild>
+          <SidebarGroupLabel
+            className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground cursor-pointer hover:text-foreground transition-colors w-full flex items-center justify-between group"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <span>Resources</span>
+            {isHovered && (
+              <ChevronRightIcon
+                className={`h-3 w-3 text-muted-foreground/50 transition-all duration-200 ${
+                  isOpen ? "rotate-90" : ""
+                }`}
+              />
+            )}
+          </SidebarGroupLabel>
+        </CollapsibleTrigger>
+
         <CollapsibleContent className="transition-all data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
           <SidebarGroupContent>
             <SidebarMenu>
@@ -77,7 +99,7 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
                 ) : (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         className="opacity-50 cursor-not-allowed text-muted-foreground"
                         onClick={(e) => e.preventDefault()}
                       >
@@ -96,7 +118,10 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
               <SidebarMenuItem>
                 {permissions.canUseDeployments ? (
                   <SidebarMenuButton asChild>
-                    <Link className="flex items-center gap-2" href="/deployments">
+                    <Link
+                      className="flex items-center gap-2"
+                      href="/deployments"
+                    >
                       <RocketIcon size={16} />
                       <span className="text-sm font-medium">Deployments</span>
                     </Link>
@@ -104,7 +129,7 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
                 ) : (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         className="opacity-50 cursor-not-allowed text-muted-foreground"
                         onClick={(e) => e.preventDefault()}
                       >
@@ -122,8 +147,8 @@ export function ResourcesSection({ permissions }: ResourcesSectionProps) {
               {/* Recruitment */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link 
-                    className="flex items-center gap-2" 
+                  <Link
+                    className="flex items-center gap-2"
                     href="/recruitment"
                     onClick={handleRecruitmentClick}
                   >
