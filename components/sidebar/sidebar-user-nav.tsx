@@ -64,7 +64,9 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   // Vérifier au chargement si on doit afficher la modale de connexion
   useEffect(() => {
-    if (status === "loading") return;
+    if (status === "loading") {
+      return;
+    }
 
     if (!isAuthenticated) {
       const hasSeenPrompt = sessionStorage.getItem("hasSeenLoginPrompt");
@@ -75,7 +77,9 @@ export function SidebarUserNav({ user }: { user: User }) {
           sessionStorage.setItem("hasSeenLoginPrompt", "true");
         }, 500);
 
-        return () => clearTimeout(timer);
+        return () => {
+          clearTimeout(timer);
+        };
       }
     }
   }, [status, isAuthenticated]);
