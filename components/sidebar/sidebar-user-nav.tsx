@@ -48,23 +48,14 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Déterminer le type d'utilisateur
   const isGuest = guestRegex.test(session?.user?.email ?? "");
 
-  // SOLUTION SIMPLE ET DIRECTE : dès que le statut est "unauthenticated", on affiche la fenêtre
+  // UNIQUEMENT ça : si pas connecté, afficher la fenêtre
   useEffect(() => {
-    console.log("Auth status:", status); // Pour debug
-
     if (status === "unauthenticated") {
-      // Afficher la fenêtre immédiatement
       setShowLoginPrompt(true);
     }
-
-    if (status === "authenticated") {
-      // Cacher la fenêtre si on est connecté
-      setShowLoginPrompt(false);
-    }
-  }, [status]); // Se déclenche à chaque changement de statut
+  }, [status]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -105,7 +96,6 @@ export function SidebarUserNav({ user }: { user: User }) {
     }
   };
 
-  // Déterminer l'email à afficher
   const displayEmail = () => {
     if (status === "loading") {
       return "Loading...";
@@ -119,7 +109,6 @@ export function SidebarUserNav({ user }: { user: User }) {
     return session?.user?.email || user?.email || "User";
   };
 
-  // Déterminer la source de l'avatar
   const avatarSrc = session?.user?.email
     ? `https://avatar.vercel.sh/${session.user.email}`
     : `https://avatar.vercel.sh/${user?.email || "default"}`;
@@ -194,7 +183,6 @@ export function SidebarUserNav({ user }: { user: User }) {
         </SidebarMenuItem>
       </SidebarMenu>
 
-      {/* Modale de confirmation de déconnexion */}
       <AlertDialog onOpenChange={setShowLogoutConfirm} open={showLogoutConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -212,7 +200,6 @@ export function SidebarUserNav({ user }: { user: User }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modale d'invitation à se connecter */}
       <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
