@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoaderIcon } from "@/components/icons";
 import { toast } from "@/components/toast";
 import {
@@ -19,6 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,8 +46,37 @@ export function SidebarUserNav({ user }: { user: User }) {
   const { data, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const isGuest = guestRegex.test(data?.user?.email ?? "");
+  const isAuthenticated = !isGuest && !!user;
+
+  // Fonction pour notifier les autres onglets
+  const notifyAuthChange = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const channel = new BroadcastChannel("auth_sync");
+      channel.postMessage({ type: "AUTH_CHANGED" });
+      channel.close();
+    }
+  }, []);
+
+  // Afficher la modale si non connecté
+  useEffect(() => {
+    if (status === "loading") {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      const hasSeenPrompt = sessionStorage.getItem("hasSeenLoginPrompt");
+      if (!hasSeenPrompt) {
+        const timer = setTimeout(() => {
+          setShowLoginPrompt(true);
+          sessionStorage.setItem("hasSeenLoginPrompt", "true");
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [status, isAuthenticated]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -47,9 +84,21 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
+    sessionStorage.removeItem("hasSeenLoginPrompt");
     signOut({ redirect: false }).then(() => {
+      notifyAuthChange();
       window.location.href = "/";
     });
+  };
+
+  const handleLoginRedirect = () => {
+    setShowLoginPrompt(false);
+    notifyAuthChange();
+    router.push("/login");
+  };
+
+  const handleContinueAsGuest = () => {
+    setShowLoginPrompt(false);
   };
 
   const handleAuthAction = () => {
@@ -62,6 +111,7 @@ export function SidebarUserNav({ user }: { user: User }) {
     }
 
     if (isGuest) {
+      notifyAuthChange();
       router.push("/login");
     } else {
       handleLogout();
@@ -152,6 +202,31 @@ export function SidebarUserNav({ user }: { user: User }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modale d'invitation à se connecter */}
+      <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Welcome back!</DialogTitle>
+            <DialogDescription>
+              You're currently browsing as a guest. Sign in to access your
+              account and saved conversations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 mt-4">
+            <Button className="w-full" onClick={handleLoginRedirect}>
+              Sign in
+            </Button>
+            <Button
+              className="w-full"
+              onClick={handleContinueAsGuest}
+              variant="outline"
+            >
+              Continue as guest
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
