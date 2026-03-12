@@ -41,6 +41,9 @@ import {
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
 
+// Clé pour le sessionStorage
+const LOGIN_PROMPT_SHOWN_KEY = "loginPromptShown";
+
 export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -48,23 +51,31 @@ export function SidebarUserNav({ user }: { user: User }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  // Determine user type
+  // Déterminer le type d'utilisateur
   const isGuest = guestRegex.test(session?.user?.email ?? "");
 
-  // Afficher la modale si l'utilisateur n'est pas connecté
+  // Afficher la modale UNE SEULE FOIS si l'utilisateur n'est pas connecté
   useEffect(() => {
     if (status === "loading") {
       return;
     }
 
-    // Show login prompt only for unauthenticated users (including guests)
-    if (status === "unauthenticated") {
+    // Vérifier si la modale a déjà été affichée dans cette session
+    const hasPromptBeenShown =
+      sessionStorage.getItem(LOGIN_PROMPT_SHOWN_KEY) === "true";
+
+    // Afficher la modale uniquement pour les utilisateurs non authentifiés
+    // et seulement si elle n'a pas déjà été affichée
+    if (status === "unauthenticated" && !hasPromptBeenShown) {
       const timer = setTimeout(() => {
         setShowLoginPrompt(true);
+        // Marquer que la modale a été affichée
+        sessionStorage.setItem(LOGIN_PROMPT_SHOWN_KEY, "true");
       }, 300);
+
       return () => clearTimeout(timer);
     }
-  }, [status]);
+  }, [status]); // Dépend seulement de status, pas de la modale
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -83,6 +94,9 @@ export function SidebarUserNav({ user }: { user: User }) {
 
   const handleContinueAsGuest = () => {
     setShowLoginPrompt(false);
+    // Optionnel: On pourrait réinitialiser le flag si on veut que la modale
+    // se réaffiche après un certain temps ou une action spécifique
+    // sessionStorage.removeItem(LOGIN_PROMPT_SHOWN_KEY);
   };
 
   const handleAuthAction = () => {
@@ -96,19 +110,19 @@ export function SidebarUserNav({ user }: { user: User }) {
 
     if (status === "authenticated") {
       if (isGuest) {
-        // Guest users can login to convert to real account
+        // Les utilisateurs invités peuvent se connecter
         router.push("/login");
       } else {
-        // Real authenticated users can logout
+        // Les utilisateurs authentifiés peuvent se déconnecter
         handleLogout();
       }
     } else {
-      // Unauthenticated users go to login
+      // Les utilisateurs non authentifiés vont à la page de connexion
       router.push("/login");
     }
   };
 
-  // Determine display email
+  // Déterminer l'email à afficher
   const displayEmail = () => {
     if (status === "loading") {
       return "Loading...";
@@ -122,7 +136,7 @@ export function SidebarUserNav({ user }: { user: User }) {
     return session?.user?.email || user?.email || "User";
   };
 
-  // Determine avatar source
+  // Déterminer la source de l'avatar
   const avatarSrc = session?.user?.email
     ? `https://avatar.vercel.sh/${session.user.email}`
     : `https://avatar.vercel.sh/${user?.email || "default"}`;
