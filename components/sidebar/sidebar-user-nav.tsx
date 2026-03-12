@@ -51,22 +51,20 @@ export function SidebarUserNav({ user }: { user: User }) {
   // Déterminer le type d'utilisateur
   const isGuest = guestRegex.test(session?.user?.email ?? "");
 
-  // Afficher la modale automatiquement si l'utilisateur n'est pas connecté
+  // SOLUTION SIMPLE ET DIRECTE : dès que le statut est "unauthenticated", on affiche la fenêtre
   useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
+    console.log("Auth status:", status); // Pour debug
 
-    // Si l'utilisateur n'est PAS authentifié, afficher la modale
     if (status === "unauthenticated") {
-      // Petit délai pour éviter un flash de l'interface
-      const timer = setTimeout(() => {
-        setShowLoginPrompt(true);
-      }, 300);
-
-      return () => clearTimeout(timer);
+      // Afficher la fenêtre immédiatement
+      setShowLoginPrompt(true);
     }
-  }, [status]); // Se déclenche quand le statut d'authentification change
+
+    if (status === "authenticated") {
+      // Cacher la fenêtre si on est connecté
+      setShowLoginPrompt(false);
+    }
+  }, [status]); // Se déclenche à chaque changement de statut
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -214,7 +212,7 @@ export function SidebarUserNav({ user }: { user: User }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modale d'invitation à se connecter - s'affiche automatiquement */}
+      {/* Modale d'invitation à se connecter */}
       <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
