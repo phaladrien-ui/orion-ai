@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useActionState, useCallback, useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
@@ -22,14 +22,6 @@ export default function Page() {
 
   const { update: updateSession } = useSession();
 
-  const notifyAuthChange = useCallback(() => {
-    if (typeof window !== "undefined") {
-      const channel = new BroadcastChannel("auth_sync");
-      channel.postMessage({ type: "AUTH_CHANGED" });
-      channel.close();
-    }
-  }, []);
-
   useEffect(() => {
     if (state.status === "failed") {
       toast({
@@ -44,10 +36,9 @@ export default function Page() {
     } else if (state.status === "success") {
       setIsSuccessful(true);
       updateSession();
-      notifyAuthChange();
       window.location.href = "/";
     }
-  }, [state.status, updateSession, notifyAuthChange]);
+  }, [state.status, updateSession]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
