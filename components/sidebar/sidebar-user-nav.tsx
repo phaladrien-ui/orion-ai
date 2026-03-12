@@ -43,28 +43,37 @@ import { guestRegex } from "@/lib/constants";
 
 export function SidebarUserNav({ user }: { user: User }) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data, status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const isGuest = guestRegex.test(session?.user?.email ?? "");
+  const isGuest = guestRegex.test(data?.user?.email ?? "");
+  const isAuthenticated = !isGuest && !!user;
 
-  // UNIQUEMENT ça : si pas connecté, afficher la fenêtre
+  // Afficher la modale si l'utilisateur n'est pas connecté
   useEffect(() => {
-    if (status === "unauthenticated") {
-      setShowLoginPrompt(true);
+    if (status === "loading") {
+      return;
     }
-  }, [status]);
+
+    if (!isAuthenticated) {
+      const timer = setTimeout(() => {
+        setShowLoginPrompt(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [status, isAuthenticated]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
   };
 
-  const confirmLogout = async () => {
+  const confirmLogout = () => {
     setShowLogoutConfirm(false);
-    await signOut({ redirect: false });
-    window.location.href = "/";
+    signOut({ redirect: false }).then(() => {
+      window.location.href = "/";
+    });
   };
 
   const handleLoginRedirect = () => {
@@ -85,33 +94,12 @@ export function SidebarUserNav({ user }: { user: User }) {
       return;
     }
 
-    if (status === "authenticated") {
-      if (isGuest) {
-        router.push("/login");
-      } else {
-        handleLogout();
-      }
-    } else {
-      router.push("/login");
-    }
-  };
-
-  const displayEmail = () => {
-    if (status === "loading") {
-      return "Loading...";
-    }
-    if (status === "unauthenticated") {
-      return "Not signed in";
-    }
     if (isGuest) {
-      return "Guest";
+      router.push("/login");
+    } else {
+      handleLogout();
     }
-    return session?.user?.email || user?.email || "User";
   };
-
-  const avatarSrc = session?.user?.email
-    ? `https://avatar.vercel.sh/${session.user.email}`
-    : `https://avatar.vercel.sh/${user?.email || "default"}`;
 
   return (
     <>
@@ -137,14 +125,14 @@ export function SidebarUserNav({ user }: { user: User }) {
                   data-testid="user-nav-button"
                 >
                   <Image
-                    alt={displayEmail()}
+                    alt={user.email ?? "User Avatar"}
                     className="rounded-full"
                     height={24}
-                    src={avatarSrc}
+                    src={`https://avatar.vercel.sh/${user.email}`}
                     width={24}
                   />
                   <span className="truncate" data-testid="user-email">
-                    {displayEmail()}
+                    {isGuest ? "Guest" : user?.email}
                   </span>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
@@ -158,9 +146,9 @@ export function SidebarUserNav({ user }: { user: User }) {
               <DropdownMenuItem
                 className="cursor-pointer"
                 data-testid="user-nav-item-theme"
-                onSelect={() => {
-                  setTheme(resolvedTheme === "dark" ? "light" : "dark");
-                }}
+                onSelect={() =>
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
               >
                 {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
               </DropdownMenuItem>
@@ -171,11 +159,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                   onClick={handleAuthAction}
                   type="button"
                 >
-                  {status === "authenticated"
-                    ? isGuest
-                      ? "Login to your account"
-                      : "Sign out"
-                    : "Sign in"}
+                  {isGuest ? "Login to your account" : "Sign out"}
                 </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -183,6 +167,7 @@ export function SidebarUserNav({ user }: { user: User }) {
         </SidebarMenuItem>
       </SidebarMenu>
 
+      {/* Modale de confirmation de déconnexion */}
       <AlertDialog onOpenChange={setShowLogoutConfirm} open={showLogoutConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -200,6 +185,7 @@ export function SidebarUserNav({ user }: { user: User }) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Modale d'invitation à se connecter */}
       <Dialog onOpenChange={setShowLoginPrompt} open={showLoginPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
